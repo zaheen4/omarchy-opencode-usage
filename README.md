@@ -25,7 +25,7 @@ never run OpenCode.
 ## Install
 
 ```bash
-omarchy plugin add https://github.com/markbus-ai/omarchy-opencode-usage --enable
+omarchy plugin add https://github.com/zaheen4/omarchy-opencode-usage --enable
 ```
 
 The widget joins the bar's default layout at the next shell reload
@@ -80,7 +80,7 @@ counts only, never conversation content.
 
 ## Interactions
 
-- Bar icon: left = panel, right = refresh, middle = next provider.
+- Bar icon: left = panel, right = launch `omarchy-agent --pick`, middle = refresh.
 - Panel: `j`/`k` scroll, `r` or Enter refresh, Tab moves to the neighboring
   bar panel, Esc closes.
 - IPC: `omarchy-shell markbusai.opencode-usage <open|close|toggle|refresh|next>`.
