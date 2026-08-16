@@ -25,11 +25,12 @@ never run OpenCode.
 ## Install
 
 ```bash
-omarchy plugin add https://github.com/zaheen4/omarchy-opencode-usage --enable
+omarchy plugin add https://github.com/zaheen4/omarchy-opencode-usage.git --enable --yes
 ```
 
 The widget joins the bar's default layout at the next shell reload
-(`omarchy-restart-shell`). Remove it with:
+(`omarchy-restart-shell`). `omarchy plugin update markbusai.opencode-usage`
+pulls future changes from this fork. Remove it with:
 
 ```bash
 omarchy plugin remove markbusai.opencode-usage
