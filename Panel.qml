@@ -270,6 +270,10 @@ Panel {
     settings: root.settings
   }
 
+  UpdateChecker {
+    id: updateChecker
+  }
+
   // Cheap enough to keep running: it only re-evaluates text bindings, and a
   // stale "resets in 2h" on a panel that is open is worse than a timer.
   Timer {
@@ -281,13 +285,20 @@ Panel {
 
   IpcHandler {
     target: root.ipcTarget
-    function open(): void { root.open() }
-    function close(): void { root.close() }
-    function show(): void { root.open() }
-    function hide(): void { root.close() }
-    function toggle(): void { root.toggle() }
+    function open() { root.open() }
+    function close() { root.close() }
+    function show() { root.open() }
+    function hide() { root.close() }
+    function toggle() { root.toggle() }
     function refresh(): string { root.refreshNow(); return "ok" }
     function next(): string { root.selectProvider(root.providerIndex + 1); return "ok" }
+    function checkUpdates(): string { updateChecker.check(); return "ok" }
+    function updatePlugin(): string { updateChecker.installUpdate(); return "ok" }
+    function updateStatus(): string {
+      return updateChecker.statusText !== ""
+        ? updateChecker.statusText
+        : updateChecker.versionText
+    }
   }
 
   BarIconButton {
@@ -539,6 +550,76 @@ Panel {
                 // the same scale-to-peak the weekly chart uses for its busiest day.
                 share: modelData.total / Math.max(1, root.models[0].total)
               }
+            }
+          }
+
+          // ---------- Updates ----------
+          PanelSeparator {
+            visible: !!root.provider
+            foreground: root.foreground
+          }
+
+          Column {
+            id: updateSection
+            visible: !!root.provider
+            width: parent.width
+            spacing: Style.spacing.sm
+
+            Item {
+              width: parent.width
+              implicitHeight: Math.max(versionText.implicitHeight, updateButtons.implicitHeight)
+
+              Text {
+                id: versionText
+                text: updateChecker.versionText
+                color: root.dim
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.caption
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+              }
+
+              Row {
+                id: updateButtons
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: Style.spacing.sm
+
+                Button {
+                  text: updateChecker.checking ? "Checking…"
+                    : updateChecker.updating ? "Updating…"
+                    : "Check for updates"
+                  bordered: true
+                  enabled: !updateChecker.busy
+                  foreground: updateChecker.busy ? root.dim : root.foreground
+                  fontFamily: root.fontFamily
+                  fontSize: Style.font.caption
+                  verticalPadding: Style.spacing.controlPaddingY
+                  onClicked: updateChecker.check()
+                }
+
+                Button {
+                  visible: updateChecker.updateAvailable
+                  text: "Update now"
+                  bordered: true
+                  enabled: !updateChecker.busy
+                  foreground: updateChecker.busy ? root.dim : root.foreground
+                  fontFamily: root.fontFamily
+                  fontSize: Style.font.caption
+                  verticalPadding: Style.spacing.controlPaddingY
+                  onClicked: updateChecker.installUpdate()
+                }
+              }
+            }
+
+            Text {
+              visible: text !== ""
+              width: parent.width
+              text: updateChecker.statusText
+              color: updateChecker.failed ? root.urgent : root.dim
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+              wrapMode: Text.WordWrap
             }
           }
 

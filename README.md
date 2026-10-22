@@ -29,8 +29,24 @@ omarchy plugin add https://github.com/zaheen4/omarchy-opencode-usage.git --enabl
 ```
 
 The widget joins the bar's default layout at the next shell reload
-(`omarchy-restart-shell`). `omarchy plugin update markbusai.opencode-usage`
-pulls future changes from this fork. Remove it with:
+(`omarchy-restart-shell`).
+
+### Updates
+
+Open the panel and use **Check for updates**. The check contacts the remote only
+when you click it; there is no background update polling. If a fast-forward is
+available, **Update now** runs Omarchy's validated update flow (fast-forward,
+manifest validation, and plugin rescan). From a terminal you can run the same
+update directly:
+
+```bash
+omarchy plugin update markbusai.opencode-usage
+```
+
+Updates fast-forward only, so uncommitted local changes can block them. See
+[CHANGELOG.md](CHANGELOG.md) for the current changes.
+
+Remove the widget with:
 
 ```bash
 omarchy plugin remove markbusai.opencode-usage
@@ -113,7 +129,7 @@ counts only, never conversation content.
 - Bar icon: left = panel, right = launch `omarchy-agent --pick`, middle = refresh.
 - Panel: `j`/`k` scroll, `r` or Enter refresh, Tab moves to the neighboring
   bar panel, Esc closes.
-- IPC: `omarchy-shell markbusai.opencode-usage <open|close|toggle|refresh|next>`.
+- IPC: `omarchy-shell markbusai.opencode-usage <open|close|toggle|refresh|next|checkUpdates|updatePlugin|updateStatus>`.
 
 ## License
 

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "markbusai.opencode-usage",
   "name": "OpenCode Usage",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "markbus-ai",
   "license": "MIT",
   "description": "OpenCode token usage and models in a native Omarchy bar panel.",
