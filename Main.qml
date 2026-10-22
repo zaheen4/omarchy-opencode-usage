@@ -13,6 +13,9 @@ Item {
     id: opencodeProvider
     enabled: root.providerEnabled("opencode")
     providerSettings: root.settings && root.settings.providers && root.settings.providers.opencode ? root.settings.providers.opencode : ({})
+    watchDatabase: root.setting("watchDatabase", true) !== false
+    scanThrottleSec: Number(root.setting("scanThrottleSec", 60))
+    safetyIntervalSec: Math.max(60, Number(root.setting("refreshIntervalSec", 3600)))
     onLastRefreshedAtMsChanged: root.scheduleSync()
     onReadyChanged: root.scheduleSync()
   }
@@ -45,7 +48,6 @@ Item {
   property bool refreshing: opencodeProvider.refreshing || syncRunning
   property double aggregateUpdatedAtMs: aggregateData && aggregateData.updatedAtMs ? Number(aggregateData.updatedAtMs) : 0
   property double lastRefreshedAtMs: Math.max(aggregateUpdatedAtMs, opencodeProvider.lastRefreshedAtMs || 0)
-  property int refreshIntervalSec: Math.max(30, Number(setting("refreshIntervalSec", 900)))
 
   property var syncModeSetting: setting("syncMode", setting("syncEnabled", false))
   property bool syncEnabled: parseSyncEnabled(syncModeSetting)
@@ -77,13 +79,9 @@ Item {
     return value === undefined || value === null ? fallback : value
   }
 
-  Timer {
-    interval: root.refreshIntervalSec * 1000
-    running: true
-    repeat: true
-    triggeredOnStart: true
-    onTriggered: root.refreshAll()
-  }
+  // Scanning is event-driven inside each provider: inotify on the OpenCode
+  // database plus a slow safety timer. There is deliberately no periodic
+  // "scan everything" timer here.
 
   Timer {
     id: syncDebounce
@@ -518,22 +516,34 @@ Item {
 
   function refresh() { refreshAll(true) }
 
-  function refreshAll(force) {
+  function refreshQuick() {
     for (var i = 0; i < providers.length; i++) {
       var p = providers[i]
-      if (p.enabled && typeof p.refresh === "function") p.refresh(force === true)
+      if (p.enabled && typeof p.refreshQuick === "function") p.refreshQuick()
+    }
+  }
+
+  function refreshFull() {
+    for (var i = 0; i < providers.length; i++) {
+      var p = providers[i]
+      if (p.enabled && typeof p.refreshFull === "function") p.refreshFull()
     }
     scheduleSync()
   }
 
-  // Opening the panel wants the numbers that go stale on the wire, not another
-  // walk over every transcript on disk. Forcing a whole refresh would do both,
-  // and re-opening the panel would then rescan the lot each time.
-  function refreshLimits() {
-    for (var i = 0; i < providers.length; i++) {
-      var p = providers[i]
-      if (p.enabled && typeof p.refreshLimits === "function") p.refreshLimits()
+  function refreshAll(force) {
+    if (force === true) {
+      refreshFull()
+      return
     }
+    refreshQuick()
+    scheduleSync()
+  }
+
+  // Opening the panel is exactly when the seven-day breakdown matters, so ask
+  // the provider for its full (still indexed, still cheap) pass.
+  function refreshLimits() {
+    refreshFull()
   }
 
   function formatTokenCount(n) {

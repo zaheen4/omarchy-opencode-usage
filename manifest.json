@@ -23,14 +23,18 @@
           "enabled": true
         }
       },
-      "refreshIntervalSec": 900,
+      "refreshIntervalSec": 3600,
+      "watchDatabase": true,
+      "scanThrottleSec": 60,
       "syncMode": "Off",
       "syncDir": "",
       "syncFileName": "",
       "syncDeviceId": ""
     },
     "schema": [
-      { "key": "refreshIntervalSec", "type": "integer", "label": "Refresh interval (seconds)", "min": 30, "max": 3600, "step": 30, "defaultValue": 900 },
+      { "key": "refreshIntervalSec", "type": "integer", "label": "Safety refresh interval (seconds)", "min": 300, "max": 7200, "step": 300, "defaultValue": 3600, "description": "Fallback poll. Normal refreshes are event-driven: the widget watches the OpenCode database and scans only after it changes." },
+      { "key": "watchDatabase", "type": "boolean", "label": "Watch database for changes", "defaultValue": true, "description": "Use inotify on the OpenCode data directory so idle time costs nothing. Disable to fall back to the safety interval only." },
+      { "key": "scanThrottleSec", "type": "integer", "label": "Minimum seconds between background scans", "min": 15, "max": 300, "step": 15, "defaultValue": 60, "description": "While OpenCode is streaming it writes constantly; this coalesces those writes into one quick scan." },
       { "key": "syncMode", "type": "enum", "label": "Synced aggregation", "options": ["Off", "On"], "defaultValue": "Off", "description": "When On, write this machine's local usage snapshot and merge snapshots from other machines." },
       { "key": "syncDir", "type": "path", "label": "Sync folder", "defaultValue": "", "description": "A folder synced by Syncthing, Dropbox, rsync, etc." },
       { "key": "syncFileName", "type": "string", "label": "Snapshot file name", "defaultValue": "", "description": "Optional. Defaults to <hostname>.json. Use a different file name on each machine, such as laptop.json or desktop.json." },
